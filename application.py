@@ -16,8 +16,8 @@ class Todo(db.Model):
         return '<Task %r>' % self.id
 @app.route("/mountain/")
 def helloWorld():
-    tasks = Todo.query.order_by(Todo.date_created).all()
-    return tasks
+    id1 = Todo.query.filter(Todo.id == 1).all()
+    return id1
 
 @app.route("/", methods=['POST', 'GET', 'PUT'])
 def hello():
