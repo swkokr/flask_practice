@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect
+from flask import Flask, render_template, url_for, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -16,8 +16,8 @@ class Todo(db.Model):
         return '<Task %r>' % self.id
 @app.route("/mountain/")
 def helloWorld():
-    tasks = Todo.query.order_by(Todo.date_created).first()
-    return render_template('index.html', tasks=tasks)
+    tasks = Todo.query.order_by(Todo.date_created).all()
+    return jsonify(tasks)
 
 @app.route("/", methods=['POST', 'GET'])
 def hello():
