@@ -18,7 +18,7 @@ class Todo(db.Model):
 def helloWorld():
     return "hello World"
 
-@app.route("/", methods=['POST', 'GET'])
+@app.route("/", methods=['POST', 'GET', 'PUT'])
 def hello():
     if request.method == 'POST':
         task_content = request.form['content']
@@ -30,7 +30,8 @@ def hello():
             return redirect('/')
         except:
             return 'There was an issue adding your task'
-
+    elif request.method == 'PUT':
+        return "hello World"
     else:
         tasks = Todo.query.order_by(Todo.date_created).all()
         return render_template('index.html', tasks=tasks)
