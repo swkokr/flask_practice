@@ -17,7 +17,7 @@ class Todo(db.Model):
 @app.route("/mountain/")
 def helloWorld():
     id1 = Todo.query.filter(Todo.id == 1).all()
-    return id1
+    return render_template('index.html', tasks=id1)
 
 @app.route("/", methods=['POST', 'GET', 'PUT'])
 def hello():
