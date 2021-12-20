@@ -14,6 +14,9 @@ class Todo(db.Model):
 
     def __repr__(self):
         return '<Task %r>' % self.id
+@app.route("/mountain/")
+def helloWorld():
+    return "hello World"
 
 @app.route("/", methods=['POST', 'GET'])
 def hello():
@@ -54,7 +57,7 @@ def update(id):
             db.session.commit()
             return redirect('/')
         except:
-            return "Ther was an issue updating your task"
+            return "There was an issue updating your task"
     else:
         return render_template('update.html', task=task)
 
