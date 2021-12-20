@@ -19,7 +19,7 @@ def helloWorld():
     tasks = Todo.query.order_by(Todo.date_created).first()
     return render_template('index.html', tasks=tasks)
 
-@app.route("/", methods=['POST', 'GET', 'PUT'])
+@app.route("/", methods=['POST', 'GET'])
 def hello():
     if request.method == 'POST':
         task_content = request.form['content']
@@ -34,6 +34,13 @@ def hello():
     else:
         tasks = Todo.query.order_by(Todo.date_created).all()
         return render_template('index.html', tasks=tasks)
+
+@app.route("/<int:id>", methods=['GET'])
+def getTask(id):
+    task_to_select = Todo.query.get_or_404(id)
+    task = Todo.query.filter(Todo.id == task_to_select)
+    return render_template('index.html', tasks=task)
+
 
 @app.route('/delete/<int:id>')
 def delete(id):
