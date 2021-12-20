@@ -17,7 +17,7 @@ class Todo(db.Model):
 @app.route("/mountain/")
 def helloWorld():
     tasks = Todo.query.order_by(Todo.date_created).all()
-    return jsonify({'token' : 'json'})
+    return jsonify([tasks])
 
 @app.route("/", methods=['POST', 'GET'])
 def hello():
