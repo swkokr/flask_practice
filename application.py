@@ -34,8 +34,7 @@ def hello():
         return "hello World"
     else:
         tasks = Todo.query.order_by(Todo.date_created).all()
-        return "Hello World"
-        #return render_template('index.html', tasks=tasks)
+        return render_template('index.html', tasks=tasks)
 
 @app.route('/delete/<int:id>')
 def delete(id):
