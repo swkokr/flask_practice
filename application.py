@@ -1,10 +1,15 @@
 from flask import Flask, render_template, url_for, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
+
 from datetime import datetime
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+
 db = SQLAlchemy(app)
+ma = Marshmallow(app)
 
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -14,10 +19,22 @@ class Todo(db.Model):
 
     def __repr__(self):
         return '<Task %r>' % self.id
-@app.route("/mountain/")
+
+class TodoSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        Model = Todo
+        include_fk = True
+
+@app.route("/api")
+def api():
+    todo_schema = TodoSchema()
+    tasks = Todo.query.order_by(Todo.date_created).first()
+    return todo_schema.dump(tasks)
+
+@app.route("/mountain")
 def helloWorld():
-    tasks = Todo.query.order_by(Todo.date_created).all()
-    return jsonify([tasks])
+    tasks = Todo.query.order_by(Todo.content).all()
+    return render_template('index.html', tasks=tasks)
 
 @app.route("/", methods=['POST', 'GET'])
 def hello():
