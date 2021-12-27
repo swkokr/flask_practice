@@ -1,16 +1,18 @@
-from flask import Flask, render_template, url_for, request, redirect, jsonify
+from flask import Flask, json, render_template, url_for, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
 from datetime import datetime
 
+import json
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test_marshmallow.db'
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
+### MODELS ###
 class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(200), nullable=False)
@@ -20,6 +22,16 @@ class Todo(db.Model):
     def __repr__(self):
         return '<Task %r>' % self.id
 
+    @property
+    def serialize(self):
+        return {
+            'id'        :   self.id,
+            'content'   :   self.content,
+            'completed' :   self.completed,
+            'date_created'  :   self.date_created
+        }
+
+### SCHEMAS ###
 class TodoSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         Model = Todo
@@ -28,8 +40,13 @@ class TodoSchema(ma.SQLAlchemyAutoSchema):
 @app.route("/api")
 def api():
     todo_schema = TodoSchema()
-    tasks = Todo.query.order_by(Todo.date_created).first()
-    return todo_schema.dump(tasks)
+    # todo = Todo(content = "수정이 Love you~")
+    # db.session.add(todo)
+    # db.session.commit()
+    tasks = Todo.query.order_by(Todo.date_created).all()
+    #jsonString = json.dump(tasks) 
+    # return todo_schema.dump(tasks)
+    return jsonify(json_list = [i.serialize for i in tasks])
 
 @app.route("/mountain")
 def helloWorld():
