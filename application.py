@@ -4,7 +4,7 @@ from flask_marshmallow import Marshmallow
 
 from datetime import datetime
 
-import json
+import pymysql
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test_marshmallow.db'
