@@ -7,7 +7,7 @@ from datetime import datetime
 import json
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test_marshmallow.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
@@ -32,21 +32,25 @@ class Todo(db.Model):
         }
 
 ### SCHEMAS ###
-class TodoSchema(ma.SQLAlchemyAutoSchema):
+class TodoSchema(ma.Schema):
     class Meta:
-        Model = Todo
-        include_fk = True
+        fields = ("id", "content", "completed", "date_created")
+        #Model = Todo
+        #include_fk = True
+    
+
+todo_schema = TodoSchema()
+todos_schema = TodoSchema(many=True)
 
 @app.route("/api")
 def api():
-    todo_schema = TodoSchema()
-    # todo = Todo(content = "수정이 Love you~")
-    # db.session.add(todo)
-    # db.session.commit()
     tasks = Todo.query.order_by(Todo.date_created).all()
-    #jsonString = json.dump(tasks) 
-    # return todo_schema.dump(tasks)
     return jsonify(json_list = [i.serialize for i in tasks])
+
+@app.route("/ma")
+def marshmallow():
+    todos = Todo.query.order_by(Todo.date_created).all()
+    return jsonify(todos_schema.dump(todos))
 
 @app.route("/mountain")
 def helloWorld():
