@@ -51,6 +51,11 @@ def marshmallow():
     todos = Todo.query.order_by(Todo.date_created).all()
     return jsonify(todos_schema.dump(todos))
 
+def generateRandomString():
+    string = ""
+    #check중복()
+    return string
+
 @app.route("/mountain")
 def helloWorld():
     tasks = Todo.query.order_by(Todo.content).all()
