@@ -40,7 +40,7 @@
         <input type="submit" value="generate random string">
     </form>
 
-    <!--<table>
+    <table>
         <tr>
             <th>IPAddress</th>
             <th>Code</th>
@@ -49,18 +49,18 @@
         </tr>
         {% for roomCode in RoomCodes %}
         <tr>
-            <td>{{ roomCode.IPAddress}}</td>
+            <td>{{ roomCode.ip_address}}</td>
             <td>{{ roomCode.code}}</td>
             <td>{{ roomCode.date_created.date() }}</td>
             <td>
-                <a href="/delete/{{task.id}}">Delete</a>
+                <a href="/deleteCode/{{roomCode.id}}">Delete</a>
                 <br>
-                <a href="/update/{{task.id}}">Update</a>
+                <a href="/updateCode/{{roomCode.id}}">Update</a>
             </td>
         </tr>
         {% endfor%}
-    </table>-->
-
+    </table>
+    
 
 </div>
 {% endblock %}

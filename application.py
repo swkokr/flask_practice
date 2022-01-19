@@ -8,6 +8,7 @@ import string, random, socket
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
@@ -34,7 +35,7 @@ class Todo(db.Model):
 class RoomCode(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(10), nullable=False)
-    IPAddress = db.Column(db.String(100), nullable=False)
+    ip_address = db.Column(db.String(100), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     
     def __repr__(self):
@@ -51,6 +52,11 @@ class TodoSchema(ma.Schema):
 todo_schema = TodoSchema()
 todos_schema = TodoSchema(many=True)
 
+@app.route("/create")
+def createTable():
+    return db.create_all()
+
+
 @app.route("/api")
 def api():
     tasks = Todo.query.order_by(Todo.date_created).all()
@@ -58,23 +64,28 @@ def api():
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
-
-@app.route("/rand", methods=['GET', 'POST'])
-def rand():
+def check_exists(table, ip):
+    return True if table.query.filter(table.ip_address == ip).one() else False
+@app.route("/postCode", methods=['GET', 'POST'])
+def postCode():
     if request.method == 'POST':
         hostName = socket.gethostname()
         hostIP = socket.gethostbyname(hostName)
 
         generatedString = id_generator()
 
-        newCode = RoomCode(IPAddress=hostIP, code=generatedString)
+        newCode = RoomCode(ip_address=hostIP, code=generatedString)
+ 
+        q = bool(RoomCode.query.filter(RoomCode.ip_address == hostIP).first())
+        if q:
+            return redirect('/')
 
         try:
             db.session.add(newCode)
             db.session.commit()
             return redirect('/')
         except:
-            return "There was an issue updating your task"
+            return "There was an issue posting your code"
     else:
         return "RAND GET Method"
 
@@ -107,6 +118,18 @@ def getTask(id):
     return render_template('index.html', tasks=task)
 
 
+@app.route('/deleteCode/<int:id>')
+def deleteCode(id):
+    code_to_delete = RoomCode.query.get_or_404(id)
+
+    try:
+        db.session.delete(code_to_delete)
+        db.session.commit()
+        return redirect('/')
+    except:
+        return 'There was a problem deleting that task'
+
+
 @app.route('/delete/<int:id>')
 def delete(id):
     task_to_delete = Todo.query.get_or_404(id)
@@ -117,6 +140,22 @@ def delete(id):
         return redirect('/')
     except:
         return 'There was a problem deleting that task'
+
+@app.route('/updateCode/<int:id>', methods=['GET', 'POST'])
+def updateCode(id):
+    code = RoomCode.query.get_or_404(id)
+
+    if request.method =='POST':
+        code.content = request.form['content']
+
+        try:
+            db.session.commit()
+            return redirect('/')
+        except:
+            return "There was an issue updating your task"
+    else:
+        return render_template('update.html', task=code)
+
 
 @app.route('/update/<int:id>', methods=['GET', 'POST'])
 def update(id):
