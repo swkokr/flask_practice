@@ -64,8 +64,10 @@ def api():
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
+
 def check_exists(table, ip):
     return True if table.query.filter(table.ip_address == ip).one() else False
+
 @app.route("/code", methods=['GET', 'POST'])
 def code():
     if request.method == 'POST':
