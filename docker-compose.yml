@@ -1,0 +1,11 @@
+services:
+
+  flask:
+    build: ./
+    container_name: flask-api
+    restart: always
+    environment:
+      - APP_NAME=MyFlaskApp
+    expose:
+      - 5000
+    command: gunicorn -b 0.0.0.0:5000 wsgi:app
