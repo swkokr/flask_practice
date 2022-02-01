@@ -52,35 +52,22 @@ class TodoSchema(ma.Schema):
 todo_schema = TodoSchema()
 todos_schema = TodoSchema(many=True)
 
-@app.route("/create")
-def createTable():
-    return db.create_all()
-
-
-@app.route("/api")
-def api():
-    tasks = Todo.query.order_by(Todo.date_created).all()
-    return jsonify(json_list = [i.serialize for i in tasks])
-
-def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+def code_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-def check_exists(table, ip):
-    return True if table.query.filter(table.ip_address == ip).one() else False
-
-@app.route("/code", methods=['GET', 'POST'])
+@app.route("/code", methods=['POST', 'GET'])
 def code():
+    hostName = socket.gethostname()
+    hostIP = socket.gethostbyname(hostName)
     if request.method == 'POST':
-        hostName = socket.gethostname()
-        hostIP = socket.gethostbyname(hostName)
 
-        generatedString = id_generator()
+        generatedString = code_generator()
 
         newCode = RoomCode(ip_address=hostIP, code=generatedString)
  
-        q = bool(RoomCode.query.filter(RoomCode.ip_address == hostIP).first())
-        if q:
-            return redirect('/')
+        existingIP = bool(RoomCode.query.filter(RoomCode.ip_address == hostIP).first())
+        if existingIP:
+            return hostIP
 
         try:
             db.session.add(newCode)
@@ -88,23 +75,12 @@ def code():
             return redirect('/')
         except:
             return "There was an issue posting your code"
+    elif request.method == 'GET':
+        _IP = request.form['ip']
+        # id, code, ip_address = RoomCode.query.filter(RoomCode.code == _code).first()
+        return _IP
     else:
         return "RAND GET Method"
-
-@app.route("/ma")
-def marshmallow():
-    todos = Todo.query.order_by(Todo.date_created).all()
-    return jsonify(todos_schema.dump(todos))
-
-def generateRandomString():
-    string = ""
-    #check중복()
-    return string
-
-@app.route("/mountain")
-def helloWorld():
-    tasks = Todo.query.order_by(Todo.content).all()
-    return render_template('index.html', tasks=tasks)
 
 @app.route("/", methods=['POST', 'GET'])
 def hello():
@@ -187,4 +163,29 @@ def update(id):
 if __name__ == "__main__":
     app.run(debug=True)
     #app.run(host='0.0.0.0')
+
+
+#
+# for testing
+#
+
+@app.route("/ma")
+def marshmallow():
+    todos = Todo.query.order_by(Todo.date_created).all()
+    return jsonify(todos_schema.dump(todos))
+
+@app.route("/mountain")
+def helloWorld():
+    tasks = Todo.query.order_by(Todo.content).all()
+    return render_template('index.html', tasks=tasks)
+
+@app.route("/create")
+def createTable():
+    return db.create_all()
+
+@app.route("/api")
+def api():
+    tasks = Todo.query.order_by(Todo.date_created).all()
+    return jsonify(json_list = [i.serialize for i in tasks])
+
 
