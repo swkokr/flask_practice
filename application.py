@@ -61,6 +61,7 @@ def code():
     hostIP = socket.gethostbyname(hostName)
     if request.method == 'POST':
 
+        return request.form
         generatedString = code_generator()
 
         newCode = RoomCode(ip_address=hostIP, code=generatedString)
@@ -76,9 +77,10 @@ def code():
         except:
             return "There was an issue posting your code"
     elif request.method == 'GET':
-        _IP = request.form['ip']
-        # id, code, ip_address = RoomCode.query.filter(RoomCode.code == _code).first()
-        return _IP
+        _code = request.args['code']
+        query_data = RoomCode.query.filter(RoomCode.code == _code).first()
+        ip_address = query_data.ip_address
+        return ip_address
     else:
         return "RAND GET Method"
 
