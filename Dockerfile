@@ -2,7 +2,7 @@ FROM python:3.9
 
 WORKDIR /flaskAPI
 
-ADD . /flaskAPI
+ADD ./requirements.txt /flaskAPI
 
 RUN pip install -r requirements.txt
 
