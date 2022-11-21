@@ -7,7 +7,8 @@ from datetime import datetime
 import string, random, socket
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test-steam.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -36,6 +37,7 @@ class RoomCode(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(10), nullable=False)
     ip_address = db.Column(db.String(100), nullable=False)
+    steamID = db.Column(db.String(100), nullable=False)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     
     def __repr__(self):
@@ -64,12 +66,13 @@ def code():
         try:
             generatedString = request.form['code']
             hostIP = request.form['hostIP']
+            steamID = request.form['steamID']
         except:
             #remove in the future
             generatedString = code_generator()
             hostIP = socket.gethostbyname(hostName)
 
-        newCode = RoomCode(ip_address=hostIP, code=generatedString)
+        newCode = RoomCode(ip_address=hostIP, code=generatedString, steamID=steamID)
  
         existingIP = bool(RoomCode.query.filter(RoomCode.ip_address == hostIP).first())
         if existingIP:
