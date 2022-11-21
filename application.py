@@ -1,4 +1,4 @@
-from flask import Flask, json, render_template, url_for, request, redirect, jsonify, flash, abort
+from flask import Flask, json, render_template, url_for, request, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
@@ -9,7 +9,6 @@ import string, random, socket
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = "secret!!"
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
@@ -56,12 +55,11 @@ todos_schema = TodoSchema(many=True)
 def code_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-@app.route("/code", methods=['POST', 'GET', 'DELETE'])
+@app.route("/code", methods=['POST', 'GET'])
 def code():
     hostName = socket.gethostname()
-    #hostIP = socket.gethostbyname(hostName)
+    hostIP = socket.gethostbyname(hostName)
     if request.method == 'POST':
-
 
         try:
             generatedString = request.form['code']
@@ -73,21 +71,9 @@ def code():
 
         newCode = RoomCode(ip_address=hostIP, code=generatedString)
  
-        isIPExisting = bool(RoomCode.query.filter(RoomCode.ip_address == hostIP).first())
-        if isIPExisting:
-            flash("the IP exists")
-            #abort(error="IP exists")
-            code_to_delete = RoomCode.query.filter(RoomCode.ip_address == hostIP).first()
-            print("delete")
-            print(code_to_delete)
-
-            try:
-                db.session.delete(code_to_delete)
-                db.session.commit()
-            except:
-                abort()
-
-
+        existingIP = bool(RoomCode.query.filter(RoomCode.ip_address == hostIP).first())
+        if existingIP:
+            return hostIP
 
         try:
             db.session.add(newCode)
@@ -100,50 +86,8 @@ def code():
         query_data = RoomCode.query.filter(RoomCode.code == _code).first()
         ip_address = query_data.ip_address
         return ip_address
-
     else:
-        return "Wrong Method for CODE"
-
-@app.route('/deleteCode', methods=['POST'])
-def deleteCode():
-    if request.method == 'POST':
-        code = request.form['code']
-        code_to_delete = RoomCode.query.filter(RoomCode.code == code).first()
-
-        print(code)
-        print(code_to_delete)
-
-        try:
-            db.session.delete(code_to_delete)
-            db.session.commit()
-            return redirect('/')
-        except:
-            return 'There was a problem deleting that task'
-
-
-@app.route('/deleteCode/<string:code>')
-def deleteCodeFromstring(code):
-    code_to_delete = RoomCode.query.filter(RoomCode.code == code).first()
-
-    print(code_to_delete)
-
-    try:
-        db.session.delete(code_to_delete)
-        db.session.commit()
-        return redirect('/')
-    except:
-        return 'There was a problem deleting that task'
-
-@app.route('/deleteCode/<int:id>')
-def deleteCodeByID(id):
-    code_to_delete = RoomCode.query.get_or_404(id)
-
-    try:
-        db.session.delete(code_to_delete)
-        db.session.commit()
-        return redirect('/')
-    except:
-        return 'There was a problem deleting that task'
+        return "RAND GET Method"
 
 @app.route("/", methods=['POST', 'GET'])
 def hello():
@@ -168,6 +112,17 @@ def getTask(id):
     task = Todo.query.filter(Todo.id == task_to_select)
     return render_template('index.html', tasks=task)
 
+
+@app.route('/deleteCode/<int:id>')
+def deleteCode(id):
+    code_to_delete = RoomCode.query.get_or_404(id)
+
+    try:
+        db.session.delete(code_to_delete)
+        db.session.commit()
+        return redirect('/')
+    except:
+        return 'There was a problem deleting that task'
 
 
 @app.route('/delete/<int:id>')
@@ -212,13 +167,14 @@ def update(id):
     else:
         return render_template('update.html', task=task)
 
+if __name__ == "__main__":
+    app.run(debug=True)
+    #app.run(host='0.0.0.0')
+
 
 #
 # for testing
 #
-@app.route("/score")
-def scoreTest():
-    return jsonify(10)
 
 @app.route("/ma")
 def marshmallow():
@@ -239,8 +195,4 @@ def api():
     tasks = Todo.query.order_by(Todo.date_created).all()
     return jsonify(json_list = [i.serialize for i in tasks])
 
-
-if __name__ == "__main__":
-    app.run(debug=True)
-    #app.run(host='0.0.0.0')
 
