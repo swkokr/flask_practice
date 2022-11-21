@@ -62,6 +62,7 @@ def code():
     #hostIP = socket.gethostbyname(hostName)
     if request.method == 'POST':
 
+
         try:
             generatedString = request.form['code']
             hostIP = request.form['hostIP']
