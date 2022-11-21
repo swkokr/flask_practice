@@ -87,8 +87,49 @@ def code():
         ip_address = query_data.ip_address
         return ip_address
     else:
-        return "RAND GET Method"
+        #return "RAND GET Method"
+        return "Wrong Method for CODE"
 
+@app.route('/deleteCode', methods=['POST'])
+def deleteCode():
+    if request.method == 'POST':
+        code = request.form['code']
+        code_to_delete = RoomCode.query.filter(RoomCode.code == code).first()
+
+        print(code)
+        print(code_to_delete)
+
+        try:
+            db.session.delete(code_to_delete)
+            db.session.commit()
+            return redirect('/')
+        except:
+            return 'There was a problem deleting that task'
+
+
+@app.route('/deleteCode/<string:code>')
+def deleteCodeFromstring(code):
+    code_to_delete = RoomCode.query.filter(RoomCode.code == code).first()
+
+    print(code_to_delete)
+
+    try:
+        db.session.delete(code_to_delete)
+        db.session.commit()
+        return redirect('/')
+    except:
+        return 'There was a problem deleting that task'
+
+@app.route('/deleteCode/<int:id>')
+def deleteCodeByID(id):
+    code_to_delete = RoomCode.query.get_or_404(id)
+
+    try:
+        db.session.delete(code_to_delete)
+        db.session.commit()
+        return redirect('/')
+    except:
+        return 'There was a problem deleting that task'
 @app.route("/", methods=['POST', 'GET'])
 def hello():
     if request.method == 'POST':
@@ -113,16 +154,16 @@ def getTask(id):
     return render_template('index.html', tasks=task)
 
 
-@app.route('/deleteCode/<int:id>')
-def deleteCode(id):
-    code_to_delete = RoomCode.query.get_or_404(id)
+#@app.route('/deleteCode/<int:id>')
+#def deleteCode(id):
+#    code_to_delete = RoomCode.query.get_or_404(id)
 
-    try:
-        db.session.delete(code_to_delete)
-        db.session.commit()
-        return redirect('/')
-    except:
-        return 'There was a problem deleting that task'
+#    try:
+#        db.session.delete(code_to_delete)
+#        db.session.commit()
+#        return redirect('/')
+#    except:
+#        return 'There was a problem deleting that task'
 
 
 @app.route('/delete/<int:id>')
