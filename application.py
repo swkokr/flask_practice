@@ -62,7 +62,6 @@ def code():
     hostName = socket.gethostname()
     hostIP = socket.gethostbyname(hostName)
     if request.method == 'POST':
-
         try:
             generatedString = request.form['code']
             hostIP = request.form['hostIP']
@@ -88,7 +87,9 @@ def code():
         _code = request.args['code']
         query_data = RoomCode.query.filter(RoomCode.code == _code).first()
         ip_address = query_data.ip_address
-        return ip_address
+        _steamID = str(query_data.steamID)
+        #return ip_address
+        return _steamID
     else:
         #return "RAND GET Method"
         return "Wrong Method for CODE"
@@ -156,19 +157,6 @@ def getTask(id):
     task_to_select = Todo.query.get_or_404(id)
     task = Todo.query.filter(Todo.id == task_to_select)
     return render_template('index.html', tasks=task)
-
-
-#@app.route('/deleteCode/<int:id>')
-#def deleteCode(id):
-#    code_to_delete = RoomCode.query.get_or_404(id)
-
-#    try:
-#        db.session.delete(code_to_delete)
-#        db.session.commit()
-#        return redirect('/')
-#    except:
-#        return 'There was a problem deleting that task'
-
 
 
 #@app.route('/deleteCode/<int:id>')
