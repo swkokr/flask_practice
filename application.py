@@ -37,7 +37,7 @@ class RoomCode(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(10), nullable=False)
     ip_address = db.Column(db.String(100), nullable=False)
-    steamID = db.Column(db.String(100), nullable=False)
+    steamID = db.Column(db.String(100), nullable=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     
     def __repr__(self):
