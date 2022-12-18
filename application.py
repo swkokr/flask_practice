@@ -37,7 +37,7 @@ class RoomCode(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(10), nullable=False)
     ip_address = db.Column(db.String(100), nullable=False)
-    steamLobbyID = db.Column(db.String(100), nullable=True)
+    lobby_id = db.Column(db.String(100), nullable=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     
     def __repr__(self):
@@ -65,13 +65,13 @@ def code():
         try:
             generatedString = request.form['code']
             hostIP = request.form['hostIP']
-            steamLobbyID = request.form['steamLobbyID']
+            lobby_id = request.form['lobby_id']
         except:
             #remove in the future
             generatedString = code_generator()
             hostIP = socket.gethostbyname(hostName)
 
-        newCode = RoomCode(ip_address=hostIP, code=generatedString, steamLobbyID=steamLobbyID)
+        newCode = RoomCode(ip_address=hostIP, code=generatedString, lobby_id=lobby_id)
  
         existingIP = bool(RoomCode.query.filter(RoomCode.ip_address == hostIP).first())
         if existingIP:
@@ -87,9 +87,9 @@ def code():
         _code = request.args['code']
         query_data = RoomCode.query.filter(RoomCode.code == _code).first()
         ip_address = query_data.ip_address
-        _steamLobbyID = str(query_data.steamLobbyID)
+        _lobby_id = str(query_data.lobby_id)
         #return ip_address
-        return _steamLobbyID
+        return _lobby_id
     else:
         #return "RAND GET Method"
         return "Wrong Method for CODE"
