@@ -88,8 +88,9 @@ def code():
         query_data = RoomCode.query.filter(RoomCode.code == _code).first()
         ip_address = query_data.ip_address
         _lobby_id = str(query_data.lobby_id)
-        #return ip_address
-        return _lobby_id
+        data = {"ip_address":ip_address, "lobby_id":_lobby_id}
+        return jsonify(data)
+        #return _lobby_id
     else:
         #return "RAND GET Method"
         return "Wrong Method for CODE"
