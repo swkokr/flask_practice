@@ -7,7 +7,8 @@ from datetime import datetime
 import string, random, socket
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test-steam.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -36,6 +37,7 @@ class RoomCode(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String(10), nullable=False)
     ip_address = db.Column(db.String(100), nullable=False)
+    lobby_id = db.Column(db.String(100), nullable=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow)
     
     def __repr__(self):
@@ -60,20 +62,24 @@ def code():
     hostName = socket.gethostname()
     hostIP = socket.gethostbyname(hostName)
     if request.method == 'POST':
-
+        print("POST")
         try:
             generatedString = request.form['code']
             hostIP = request.form['hostIP']
+            lobby_id = request.form['lobby_id']
         except:
             #remove in the future
             generatedString = code_generator()
             hostIP = socket.gethostbyname(hostName)
 
-        newCode = RoomCode(ip_address=hostIP, code=generatedString)
+        newCode = RoomCode(ip_address=hostIP, code=generatedString, lobby_id=lobby_id)
  
         existingIP = bool(RoomCode.query.filter(RoomCode.ip_address == hostIP).first())
         if existingIP:
-            return hostIP
+            code_to_delete = RoomCode.query.filter(RoomCode.ip_address == hostIP).first()
+            db.session.delete(code_to_delete)
+            db.session.commit()
+            #return hostIP
 
         try:
             db.session.add(newCode)
@@ -85,7 +91,10 @@ def code():
         _code = request.args['code']
         query_data = RoomCode.query.filter(RoomCode.code == _code).first()
         ip_address = query_data.ip_address
-        return ip_address
+        _lobby_id = str(query_data.lobby_id)
+        data = {"ip_address":ip_address, "lobby_id":_lobby_id}
+        return jsonify(data)
+        #return _lobby_id
     else:
         #return "RAND GET Method"
         return "Wrong Method for CODE"
@@ -108,9 +117,8 @@ def deleteCode():
 
 
 @app.route('/deleteCode/<string:code>')
-def deleteCodeFromstring(code):
+def deleteCodeFromString(code):
     code_to_delete = RoomCode.query.filter(RoomCode.code == code).first()
-
     print(code_to_delete)
 
     try:
@@ -123,6 +131,7 @@ def deleteCodeFromstring(code):
 @app.route('/deleteCode/<int:id>')
 def deleteCodeByID(id):
     code_to_delete = RoomCode.query.get_or_404(id)
+    print(id + code_to_delete)
 
     try:
         db.session.delete(code_to_delete)
@@ -130,6 +139,7 @@ def deleteCodeByID(id):
         return redirect('/')
     except:
         return 'There was a problem deleting that task'
+
 @app.route("/", methods=['POST', 'GET'])
 def hello():
     if request.method == 'POST':

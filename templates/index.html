@@ -49,6 +49,7 @@
         <tr>
             <th>IPAddress</th>
             <th>Code</th>
+            <th>SteamLobbyID</th>
             <th>Added</th>
             <th>Actions</th>
         </tr>
@@ -56,9 +57,9 @@
         <tr>
             <td>{{ roomCode.ip_address}}</td>
             <td>{{ roomCode.code}}</td>
+            <td>{{ roomCode.lobby_id}}</td>
             <td>{{ roomCode.date_created.date() }}</td>
             <td>
-                <!--<a href="/deleteCode/{{roomCode.id}}">Delete</a>-->
                 <a href="/deleteCode/{{roomCode.code}}">Delete</a>
                 <br>
                 <a href="/updateCode/{{roomCode.id}}">Update</a>
