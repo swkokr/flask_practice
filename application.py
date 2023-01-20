@@ -62,6 +62,7 @@ def code():
     hostName = socket.gethostname()
     hostIP = socket.gethostbyname(hostName)
     if request.method == 'POST':
+        print("POST")
         try:
             generatedString = request.form['code']
             hostIP = request.form['hostIP']
@@ -75,7 +76,10 @@ def code():
  
         existingIP = bool(RoomCode.query.filter(RoomCode.ip_address == hostIP).first())
         if existingIP:
-            return hostIP
+            code_to_delete = RoomCode.query.filter(RoomCode.ip_address == hostIP).first()
+            db.session.delete(code_to_delete)
+            db.session.commit()
+            #return hostIP
 
         try:
             db.session.add(newCode)
@@ -113,9 +117,8 @@ def deleteCode():
 
 
 @app.route('/deleteCode/<string:code>')
-def deleteCodeFromstring(code):
+def deleteCodeFromString(code):
     code_to_delete = RoomCode.query.filter(RoomCode.code == code).first()
-
     print(code_to_delete)
 
     try:
@@ -128,6 +131,7 @@ def deleteCodeFromstring(code):
 @app.route('/deleteCode/<int:id>')
 def deleteCodeByID(id):
     code_to_delete = RoomCode.query.get_or_404(id)
+    print(id + code_to_delete)
 
     try:
         db.session.delete(code_to_delete)
