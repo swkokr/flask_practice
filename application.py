@@ -54,7 +54,7 @@ class TodoSchema(ma.Schema):
 todo_schema = TodoSchema()
 todos_schema = TodoSchema(many=True)
 
-def code_generator(size=6, chars=string.ascii_uppercase + string.digits):
+def code_generator(size=2, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 @app.route("/code", methods=['POST', 'GET'])
@@ -64,7 +64,9 @@ def code():
     if request.method == 'POST':
         print("POST")
         try:
-            generatedString = request.form['code']
+            #generatedString = request.form['code']
+            generatedString = code_generator()
+            print(generatedString)
             hostIP = request.form['hostIP']
             lobby_id = request.form['lobby_id']
         except:
@@ -84,7 +86,8 @@ def code():
         try:
             db.session.add(newCode)
             db.session.commit()
-            return redirect('/')
+            return jsonify({"netCode":generatedString})
+            #return redirect('/')
         except:
             return "There was an issue posting your code"
     elif request.method == 'GET':
