@@ -2,8 +2,10 @@ from flask import Flask, json, render_template, url_for, request, redirect, json
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
-from datetime import datetime
+from datetime import datetime, timedelta
+from apscheduler.schedulers.background import BackgroundScheduler
 
+import os
 import string, random, socket
 
 app = Flask(__name__)
@@ -13,6 +15,11 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
+
+def scheduler():
+    print("old data deleted")
+    _deleteOldData()
+
 
 ### MODELS ###
 class Todo(db.Model):
@@ -221,7 +228,21 @@ def update(id):
     else:
         return render_template('update.html', task=task)
 
+def _deleteOldData():
+    dataToDelete = RoomCode.query.filter(RoomCode.date_created > (datetime.now() - timedelta(days=30))).all()
+    for data in dataToDelete:
+        db.session.delete(data) 
+
+    db.session.commit()
+
+    return 'old data deleted successfully', 200
+
+
 if __name__ == "__main__":
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        schedule = BackgroundScheduler()
+        schedule.add_job(scheduler, 'cron', second=2)
+        schedule.start()
     app.run(debug=True)
     #app.run(host='0.0.0.0')
 
