@@ -21,7 +21,7 @@ def scheduler():
     _deleteOldData()
 
 schedule = BackgroundScheduler()
-schedule.add_job(scheduler, 'cron', second=2)
+schedule.add_job(scheduler, 'cron', day_of_week='mon')
 schedule.start()
 
 
@@ -233,7 +233,7 @@ def update(id):
         return render_template('update.html', task=task)
 
 def _deleteOldData():
-    dataToDelete = RoomCode.query.filter(RoomCode.date_created > (datetime.now() - timedelta(days=30))).all()
+    dataToDelete = RoomCode.query.filter(RoomCode.date_created < (datetime.now() - timedelta(days=30))).all()
     for data in dataToDelete:
         db.session.delete(data) 
 
