@@ -20,6 +20,10 @@ def scheduler():
     print("old data deleted")
     _deleteOldData()
 
+schedule = BackgroundScheduler()
+schedule.add_job(scheduler, 'cron', second=2)
+schedule.start()
+
 
 ### MODELS ###
 class Todo(db.Model):
@@ -239,10 +243,10 @@ def _deleteOldData():
 
 
 if __name__ == "__main__":
-    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-        schedule = BackgroundScheduler()
-        schedule.add_job(scheduler, 'cron', second=2)
-        schedule.start()
+    #if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+    #    schedule = BackgroundScheduler()
+    #    schedule.add_job(scheduler, 'cron', second=2)
+    #    schedule.start()
     app.run(debug=True)
     #app.run(host='0.0.0.0')
 
